@@ -1,0 +1,25 @@
+{
+  "idempotence_key": "",
+  "from": {
+    "account_id": "",
+    "amount": 1,
+    "currency": "BRL",
+    "acquirer": {
+     "name": "Cielo",
+      "card": {
+        "token": "UEWEWIIQWE123"
+      }
+    }
+  },
+  "to": {
+    "account_id": "",
+    "amount": 1,
+    "currency": "BRL",
+    "acquirer": {
+      "name": "Cielo",
+      "card": {
+        "token": "UEWEWIIQWE123"
+      }
+    }
+  }
+}
