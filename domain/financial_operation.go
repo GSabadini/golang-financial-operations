@@ -1,30 +1,68 @@
 package domain
 
 import (
+	"context"
 	"errors"
 )
 
-type FinancialOperationBuilder interface {
-	Build(string) (Payment, error)
-}
+type (
+	FinancialOperator interface {
+		Process(
+			context.Context,
+			Authorizer,
+			RulesEvaluator,
+			Ledger,
+			Transactor,
+			FinancialOperationStreamer,
+		) (FinancialOperation, error)
+	}
 
-var (
-	ErrDuplicatedPayment = errors.New("duplicated payment")
+	Authorizer interface {
+		Create(context.Context, AuthorizationInput) (int, error)
+		FindByIdempotenceKey(context.Context, AuthorizationInput) (Authorization, error)
+	}
+
+	RulesEvaluator interface {
+		SpendingControls(context.Context, RulesInput) error
+	}
+
+	Ledger interface {
+		AvailableEntries(context.Context, LedgerInput) error
+	}
+
+	Acquirer interface {
+		Sale(context.Context, string, string, string, string) error
+	}
+
+	Transactor interface {
+		Transaction(context.Context, TransactionInput) (int, error)
+	}
+
+	FinancialOperationStreamer interface {
+		Publish(context.Context, StreamInput)
+	}
 )
 
-type Payment struct {
+var (
+	ErrDuplicatedFinancialOperation = errors.New("duplicated financial operation")
+)
+
+type FinancialOperation struct {
 	id             string
 	idempotenceKey string
+	cashIn         CashIn
+	cashOut        CashOut
+	transfer       Transfer
 }
 
-func (p Payment) ID() string {
-	return p.id
+func (f FinancialOperation) ID() string {
+	return f.id
 }
 
-func (p Payment) IdempotenceKey() string {
-	return p.idempotenceKey
+func (f FinancialOperation) IdempotenceKey() string {
+	return f.idempotenceKey
 }
 
-func (p Payment) AlreadyExists() bool {
-	return p.id != ""
+func (f FinancialOperation) AlreadyExists() bool {
+	return f.id != ""
 }
